@@ -11,7 +11,6 @@ elif majorVersion == 2:
 
 if folder:
 	here = os.path.dirname(os.path.realpath(__file__))
-	print("here = " + str(here))
 	print("Running " + folder + "/wormbait.py")
 	os.system("python " + str(here) +"/" + folder + "/wormbait.py")
 else:

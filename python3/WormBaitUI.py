@@ -1,6 +1,7 @@
 import tkinter
 from tkinter.scrolledtext import ScrolledText
 import WormCSV
+import re
 import threading
 
 class ConsoleBox (ScrolledText):
@@ -16,10 +17,12 @@ class ConsoleBox (ScrolledText):
         self.bind("<Command-a>", self.highlightAll)
 
     def write (self, text):
-        self.insert('end', text)
+        self.insert(tkinter.END, text)
+        self.see(tkinter.END)
 
     def writeln (self, text):
-        self.insert('end', text + '\n')
+        self.insert(tkinter.END, text + '\n')
+        self.see(tkinter.END)
 
     def clear (self):
         self.delete('1.0', 'end')
@@ -47,6 +50,14 @@ class ProcessButton (tkinter.Button):
 
     def logln (self, text):
         self.log(text + '\n')
+
+    def collect_xloc_ids (self, rawText):
+        xlocIds = rawText.split('\n') # Split up rows
+        xlocIds = [re.compile("[ ,]").split(i) for i in xlocIds] # Split apart rows by spaces
+        xlocIds = [i for sublist in xlocIds for i in sublist] # Flatten sublists into one level
+        cleanIds = [x.strip() for x in xlocIds] # Remove whitespace from each ID
+        cleanIds = [_f for _f in cleanIds if _f] # Remove all empty IDs
+        return cleanIds
         
     def process (self):
         self.parent.console.clear()
@@ -71,13 +82,7 @@ class ProcessButton (tkinter.Button):
             self.parent.console.writeln('Writing output CSV to: ' + outFilePath)
 
         self.logln('Processing...')
-        if ',' in listEntryText:
-            xlocIds = listEntryText.split(',')
-        else:
-            xlocIds = listEntryText.split('\n')
-        
-        cleanIds = [x.strip() for x in xlocIds]
-        cleanIds = [_f for _f in cleanIds if _f]
+        cleanIds = self.collect_xloc_ids(listEntryText)
 
         with open(self.parent.dbFilePath.get(), 'r') as csvDatabaseFile:
             self.csvDatabase = WormCSV.CuffLinkDatabase(csvDatabaseFile)
