@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import sys
 
@@ -12,7 +13,9 @@ if folder:
 	here = os.path.dirname(os.path.realpath(__file__))
 	print("here = " + str(here))
 	print("Running " + folder + "/wormbait.py")
-	os.system("python " + here +"/" + folder + "/wormbait.py")
+	os.system("python " + str(here) +"/" + folder + "/wormbait.py")
 else:
 	print("WormBait could not determine your installed Python version")
 	
+
+    
