@@ -1,6 +1,7 @@
 import csv
 import requests
 import json
+import sys
 
 class CuffLinkDatabase ():
     def __init__ (self, file):
@@ -30,11 +31,20 @@ class OutputCSV ():
         self.headers = headers
 
     def write (self, listOfWormDatas):
-        with open(self.path, 'wb') as file:
-            writer = csv.DictWriter(file, fieldnames=self.headers)
-            writer.writeheader()
-            for wormData in listOfWormDatas:
-                writer.writerow(wormData.describe())
+
+        if sys.version_info >= (3,0,0):
+           with open(self.path, 'w') as file:
+                writer = csv.DictWriter(file, fieldnames=self.headers)
+                writer.writeheader()
+                for wormData in listOfWormDatas:
+                    writer.writerow(wormData.describe())
+        else:
+            with open(self.path, 'wb') as file:
+                writer = csv.DictWriter(file, fieldnames=self.headers)
+                writer.writeheader()
+                for wormData in listOfWormDatas:
+                    writer.writerow(wormData.describe())
+        
             
 
 
@@ -52,67 +62,70 @@ class WormData ():
         self.populate()
 
     def populate (self):
-        self.data['up/down'] = self.database.get(self.xlocID)['log2(fold_change)']
+        print(('geneID = ' + self.geneID))
+        if self.geneID and self.geneID.startswith("WBGene"):
         
-        sequence = self.fetch(self.GENE_BASE, self.geneID, 'sequence_name')
-        self.data['sequence_name'] = sequence
-        
-        description = self.fetch(self.GENE_BASE, self.geneID, 'concise_description')
-        self.data['description'] = description['text']
+            self.data['up/down'] = self.database.get(self.xlocID)['log2(fold_change)']
 
-        geneModels = self.fetch(self.GENE_BASE, self.geneID, 'gene_models')
-        self.data['protein_id'] = []
-        if geneModels and 'table' in geneModels:
-            for item in geneModels['table']:
-                if item and 'protein' in item and 'id' in item['protein']:
-                    self.data['protein_id'].append(item['protein']['id'])
+            sequence = self.fetch(self.GENE_BASE, self.geneID, 'sequence_name')
+            self.data['sequence_name'] = sequence
 
-        self.joinIfExtant('protein_id')
-        
+            description = self.fetch(self.GENE_BASE, self.geneID, 'concise_description')
+            self.data['description'] = description['text']
 
-        geneClass = self.fetch(self.GENE_BASE, self.geneID, 'gene_class')
-        self.data['gene_class'] = geneClass
+            geneModels = self.fetch(self.GENE_BASE, self.geneID, 'gene_models')
+            self.data['protein_id'] = []
+            if geneModels and 'table' in geneModels:
+                for item in geneModels['table']:
+                    if item and 'protein' in item and 'id' in item['protein']:
+                        self.data['protein_id'].append(item['protein']['id'])
 
-        humanOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'human_orthologs')
-        self.data['human_orthologs'] = []
-        if humanOrthologs:
-            for item in humanOrthologs:
-                self.data['human_orthologs'].append(item['ortholog']['label'])
+            self.joinIfExtant('protein_id')
 
-        self.joinIfExtant('human_orthologs')
 
-        nematodeOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'nematode_orthologs')
-        self.data['nematode_orthologs'] = []
-        if nematodeOrthologs:
-            for item in nematodeOrthologs:
-                self.data['nematode_orthologs'].append(item['ortholog']['label'])
+            geneClass = self.fetch(self.GENE_BASE, self.geneID, 'gene_class')
+            self.data['gene_class'] = geneClass
 
-        self.joinIfExtant('nematode_orthologs')
+            humanOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'human_orthologs')
+            self.data['human_orthologs'] = []
+            if humanOrthologs:
+                for item in humanOrthologs:
+                    self.data['human_orthologs'].append(item['ortholog']['label'])
 
-        otherOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'other_orthologs')
-        self.data['other_orthologs'] = []
-        if otherOrthologs:
-            for item in otherOrthologs:
-                self.data['other_orthologs'].append(item['ortholog']['label'])
+            self.joinIfExtant('human_orthologs')
 
-        self.joinIfExtant('other_orthologs')
-        
-        self.data['best_human_ortholog'] = []
+            nematodeOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'nematode_orthologs')
+            self.data['nematode_orthologs'] = []
+            if nematodeOrthologs:
+                for item in nematodeOrthologs:
+                    self.data['nematode_orthologs'].append(item['ortholog']['label'])
 
-        isSingular =  hasattr(self.data['protein_id'], '__len__') and (not isinstance(self.data['protein_id'], str))
+            self.joinIfExtant('nematode_orthologs')
 
-        if self.data['protein_id'] and not isSingular:
-            for proteinID in self.data['protein_id']:
-                bestHumanMatch = self.fetch(self.PROTEIN_BASE, proteinID, 'best_human_match')
+            otherOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'other_orthologs')
+            self.data['other_orthologs'] = []
+            if otherOrthologs:
+                for item in otherOrthologs:
+                    self.data['other_orthologs'].append(item['ortholog']['label'])
+
+            self.joinIfExtant('other_orthologs')
+
+            self.data['best_human_ortholog'] = []
+
+            isSingular =  hasattr(self.data['protein_id'], '__len__') and (not isinstance(self.data['protein_id'], str))
+
+            if self.data['protein_id'] and not isSingular:
+                for proteinID in self.data['protein_id']:
+                    bestHumanMatch = self.fetch(self.PROTEIN_BASE, proteinID, 'best_human_match')
+                    if bestHumanMatch and 'description' in bestHumanMatch:
+                        self.data['best_human_ortholog'].append(bestHumanMatch['description'])
+            elif self.data['protein_id']:
+                bestHumanMatch = self.fetch(self.PROTEIN_BASE, self.data['protein_id'], 'best_human_match')
                 if bestHumanMatch and 'description' in bestHumanMatch:
                     self.data['best_human_ortholog'].append(bestHumanMatch['description'])
-        elif self.data['protein_id']:
-            bestHumanMatch = self.fetch(self.PROTEIN_BASE, self.data['protein_id'], 'best_human_match')
-            if bestHumanMatch and 'description' in bestHumanMatch:
-                self.data['best_human_ortholog'].append(bestHumanMatch['description'])
 
 
-        self.joinIfExtant('best_human_ortholog')
+            self.joinIfExtant('best_human_ortholog')
 
     def joinIfExtant (self, datum):
         if len(self.data[datum]) == 0:
