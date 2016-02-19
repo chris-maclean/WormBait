@@ -31,7 +31,7 @@ know or care which version of Python they have installed on their machine.
 If you don't know if you have Python on your machine, perform the following:
 1. Open a Terminal or cmd window
 2. Run this command:
-    python --version
+    `python --version`
     
 If Python is installed, you should see a line or two of information about your Python version number (probably
 2.7 or 3.x). If you get an error message, you'll need to install Python. Start here: https://www.python.org/downloads/
@@ -39,7 +39,7 @@ If Python is installed, you should see a line or two of information about your P
 To run WormBait, open a Terminal or cmd window and navigate to the folder where wormBaitLauncher
 resides. Then run the following command:
 
-./wormBaitLauncher.py
+`./wormBaitLauncher.py`
 
 You should see a line of text that says 'Running pythonX/wormbait.py', where X is either 2 or 3.
 
@@ -89,5 +89,7 @@ the results. Voila, you have successfully used WormBait to collect data from Wor
 
 
 Christopher Anna
+
 canna12@gmail.com
+
 2/2016
