@@ -8,8 +8,13 @@ from WormBaitUI import ProcessButton
 from WormBaitUI import AboutWindow
 from configparser import SafeConfigParser
 
+"""This script builds and starts the WormBait user interface.
 
-class wormbaitWindow(tkinter.Tk):
+Christopher Anna, 2/18/2016
+"""
+
+class WormbaitWindow(tkinter.Tk):
+    """The top-level window of WormBait"""
     VERSION = "1.0"
     
     def __init__(self, parent):
@@ -25,6 +30,7 @@ class wormbaitWindow(tkinter.Tk):
         self.buildContent()
 
     def buildContent(self):
+        """Builds the user interface window"""
         self.parseConfig()
         self.grid()
         
@@ -63,6 +69,7 @@ class wormbaitWindow(tkinter.Tk):
         self.entryList.focus_set()
 
     def saveIniAndDestroy (self):
+        """Writes current information to the ini file (wormBait.ini) and closes the user interface"""
         config = SafeConfigParser()
         config.read('wormBait.ini')
 
@@ -83,6 +90,7 @@ class wormbaitWindow(tkinter.Tk):
         self.destroy()
 
     def parseConfig (self):
+        """Reads the config file (wormBait.ini) and initializes variables accordingly"""
         config = SafeConfigParser()
         config.read('wormBait.ini')
 
@@ -111,19 +119,22 @@ class wormbaitWindow(tkinter.Tk):
             self.outFilePath.set('Enter desired path to output CSV file here')
 
     def OnDBBrowseButtonClick (self, *ignore):
+        """Opens a browser for selecting the CuffLink database file"""
         dialogReturn = tkinter.filedialog.askopenfilename(filetypes=[('Comma-separated value', '*.csv')])
         self.dbFilePath.set(dialogReturn)
 
     def OnOutBrowseButtonClick (self, *ignore):
+        """Opens a browser for selecting the CSV output file location"""
         dialogReturn = tkinter.filedialog.asksaveasfilename(filetypes=[('Comma-separated value', '*.csv')])
         self.outFilePath.set(dialogReturn)
 
     def showAboutWindow (self):
+        """Shows the About window"""
         aboutWindow = AboutWindow(self)
         
         
-
+# Start the user interface
 if __name__ == "__main__":
-    app = wormbaitWindow(None)
+    app = WormbaitWindow(None)
     app.title('WormBait')
     app.mainloop()

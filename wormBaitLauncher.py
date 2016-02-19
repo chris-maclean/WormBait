@@ -2,6 +2,16 @@
 import os
 import sys
 
+"""This script launches WormBait using the code compiled under Python2 or Python3.
+
+There are small but important differences in the code for Python2 and Python3. In
+the interest of cross-platform support, this launcher script determines the version
+currently running and launches the appropriate WormBait for it. If the version
+cannot be determined, the launcher exits and prints an error message. 
+
+Christopher Anna, 2/18/2016
+"""
+
 majorVersion = sys.version_info[0]
 folder = ""
 if majorVersion == 3:
