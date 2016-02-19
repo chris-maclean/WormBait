@@ -29,6 +29,7 @@ wormBaitLauncher script is provided to make running WormBait painless to those w
 know or care which version of Python they have installed on their machine.
 
 If you don't know if you have Python on your machine, perform the following:
+
 1. Open a Terminal or cmd window
 2. Run this command:
     `python --version`
