@@ -38,10 +38,10 @@ class CuffLinkDatabase ():
         for row in reader:
             self.data[row[0]] = dict(zip(headers,row))
 
-    def get (self, xlocId):
+    def get (self, dbId):
         """Returns all the data corresponding to a single row in the CuffLink DB file. Returns a dict of this information"""
-        if xlocId in self.data:
-            return self.data[xlocId]
+        if dbId in self.data:
+            return self.data[dbId]
         else:
             return None
 
@@ -73,6 +73,15 @@ class OutputCSV ():
 
     def write (self, listOfWormDatas):
         """Writes all the data in argument `listOfWormDatas` to the file"""
+
+        exclusivelyWBIds = True
+        for w in listOfWormDatas:
+            if exclusivelyWBIds and w.describe() and 'db_id' in w.describe() and w.describe()['db_id'].startswith('XLOC'):
+                exclusivelyWBIds = False
+
+        if exclusivelyWBIds:
+            self.headers.remove('db_id')
+            self.headers.remove('up/down')
 
         # This method requires a little kludgy glue to work on both Python2
         # and Python3. On v2, the file should be opened in binary write mode
@@ -111,7 +120,7 @@ class WormData ():
     PROTEIN_BASE= "http://api.wormbase.org/rest/field/protein"
     """The API base URL for protein information"""
     
-    def __init__ (self, xlocID, geneID, database):
+    def __init__ (self, dbId, geneID, database):
         """Constructs a WormData object and kicks off the populate() method
 
         populate() can take up to a few seconds, since it involves making multiple
@@ -119,7 +128,7 @@ class WormData ():
         at once.
 
         Arguments:
-        xlocID -- the XLOC_ID parameter that corresponds to this item in the CuffLink database. This is only
+        xlocID -- the DB_ID parameter that corresponds to this item in the CuffLink database. This is only
         used to find CuffLink-exclusive information like the 'log2(fold_change)' value
 
         geneID -- the WormBase gene ID. This is the unique identifier that will allow us to collect
@@ -131,7 +140,7 @@ class WormData ():
         """
         self.geneID = geneID
         self.data = {}
-        self.xlocID = xlocID
+        self.dbId = dbId
         self.data['gene_id'] = geneID
         self.database = database
         self.populate()
@@ -168,9 +177,11 @@ class WormData ():
         # we don't even try to collect the data
         if self.geneID and self.geneID.startswith("WBGene"):
 
-            # Get the log2(fold_change) value for this XLOC_ID, straight from the
-            # CuffLink database. This is the only value collected this way
-            self.data['up/down'] = self.database.get(self.xlocID)['log2(fold_change)']
+            # Get the log2(fold_change) value for this DB_ID, straight from the
+            # CuffLink database. This is the only value collected this way. Only collect
+            # this value if an DB_ID has been provided.
+            if self.dbId:
+                self.data['up/down'] = self.database.get(self.dbId)['log2(fold_change)']
 
             # Most API calls will look like this. We call self.fetch and provide
             # the base URL, unique ID, and endpoint. We get the results back in
@@ -195,7 +206,8 @@ class WormData ():
 
 
             geneClass = self.fetch(self.GENE_BASE, self.geneID, 'gene_class')
-            self.data['gene_class'] = geneClass
+            if geneClass and 'tag' in geneClass and 'label' in geneClass['tag']:
+                self.data['gene_class'] = geneClass['tag']['label']
 
             humanOrthologs = self.fetch(self.GENE_BASE, self.geneID, 'human_orthologs')
             self.data['human_orthologs'] = []
@@ -288,7 +300,7 @@ class WormData ():
             return None
 
     def describe (self):
-        """Returns the entirely of self.data"""
+        """Returns the entirety of self.data"""
         return self.data
 
     def fetch (self, baseUrl, id, datum):

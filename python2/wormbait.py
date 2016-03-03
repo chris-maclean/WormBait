@@ -15,7 +15,7 @@ Christopher Anna, 2/18/2016
 
 class WormbaitWindow(Tkinter.Tk):
     """The top-level window of WormBait"""
-    VERSION = "1.0"
+    VERSION = "2.0"
     
     def __init__(self, parent):
         Tkinter.Tk.__init__(self, parent)
@@ -76,11 +76,11 @@ class WormbaitWindow(Tkinter.Tk):
         if not config.has_section('wormBait'):
             config.add_section('wormBait')
 
-        xlocIDs = self.entryList.getValue()
-        if '\n' in xlocIDs:
-            xlocIDs = ','.join(xlocIDs.strip().split('\n'))
+        dbIds = self.entryList.getValue()
+        if '\n' in dbIds:
+            dbIds = ','.join(dbIds.strip().split('\n'))
             
-        config.set('wormBait', 'xlocIDs', xlocIDs)
+        config.set('wormBait', 'dbIds', dbIds)
         config.set('wormBait', 'degFile', self.dbFilePath.get())
         config.set('wormBait', 'outFile', self.outFilePath.get())
 
@@ -94,24 +94,24 @@ class WormbaitWindow(Tkinter.Tk):
         config = SafeConfigParser()
         config.read('wormBait.ini')
 
-        configXlocs = ""
+        configDbIds = ""
         configDegFile = ""
         configOutFile = ""
         
         if config.has_section('wormBait'):
-            configXlocs = config.get('wormBait', 'xlocIDs')
+            configDbIds = config.get('wormBait', 'dbIds')
             configDegFile = config.get('wormBait', 'degFile')
             configOutFile = config.get('wormBait', 'outFile')
 
-        if configXlocs:
-            self.entryList.writeln(configXlocs)
+        if configDbIds:
+            self.entryList.writeln(configDbIds)
         else:
-            self.entryList.writeln("Enter XLOC IDs here")
+            self.entryList.writeln("Enter DB IDs here")
 
         if configDegFile:
             self.dbFilePath.set(configDegFile)
         else:
-            self.dbFilePath.set('Enter path to DEG file here')
+            self.dbFilePath.set('Enter path to input database file here')
 
         if configOutFile:
             self.outFilePath.set(configOutFile)
@@ -119,7 +119,7 @@ class WormbaitWindow(Tkinter.Tk):
             self.outFilePath.set('Enter desired path to output CSV file here')
 
     def OnDBBrowseButtonClick (self, *ignore):
-        """Opens a browser for selecting the CuffLink database file"""
+        """Opens a browser for selecting the database file"""
         dialogReturn = tkFileDialog.askopenfilename(filetypes=[('Comma-separated value', '*.csv')])
         self.dbFilePath.set(dialogReturn)
 

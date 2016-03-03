@@ -95,18 +95,33 @@ class ProcessButton (Tkinter.Button):
         """
         self.log(text + '\n')
 
-    def collect_xloc_ids (self, rawText):
-        """Collects and scrubs the XLOC IDs from the input console
+    def collect_db_ids (self, rawText):
+        """Collects and scrubs the DB IDs from the input console
 
         After some effort, the IDs can now be separated by any combination of
         newlines and commas. Whitespace is stripped from beginning and end
         """
-        xlocIds = rawText.split('\n') # Split up rows
-        xlocIds = [re.compile("[ ,]").split(i) for i in xlocIds] # Split apart rows by spaces
-        xlocIds = [i for sublist in xlocIds for i in sublist] # Flatten sublists into one level
-        cleanIds = [x.strip() for x in xlocIds] # Remove whitespace from each ID
+        dbIds = rawText.split('\n') # Split up rows
+        dbIds = [re.compile("[ ,]").split(i) for i in dbIds] # Split apart rows by spaces
+        dbIds = [i for sublist in dbIds for i in sublist] # Flatten sublists into one level
+        cleanIds = [x.strip() for x in dbIds] # Remove whitespace from each ID
         cleanIds = filter(None, cleanIds) # Remove all empty IDs
         return cleanIds
+
+    def check_db_ids (self, db_ids):
+        """Identifies whether or not ALL of the DB IDs provided are WormBase gene IDs.
+
+        If every provided ID is a WormBase gene ID, WormBait will skip reading a provided
+        database file (since no DB will be needed to connect a DB ID to a WormBase gene ID).
+        """
+        exclusively_WB_IDs = True;
+
+        for x in db_ids:
+            if not 'WBGene' in x:
+                exclusively_WB_IDs = False
+                break
+
+        return exclusively_WB_IDs
         
     def process (self):
         """Performs the 'run' of WormBait - collects all data from WormBase and writes it to the output file"""
@@ -116,16 +131,22 @@ class ProcessButton (Tkinter.Button):
         # to perform a run
         listEntryText = self.parent.entryList.getValue()
         if not str(listEntryText) or str(listEntryText).startswith('Enter'):
-            self.logln('Please enter some number of XLOC IDs')
+            self.logln('Please enter some number of DB IDs')
             return
 
+        cleanIds = self.collect_db_ids(listEntryText)
+        noDbMode = self.check_db_ids(cleanIds)
+
         # The CuffLink database file path must be specified
-        dbFilePath = self.parent.dbFilePath.get()
-        if not dbFilePath or dbFilePath.startswith('Enter'):
-            self.logln('Please choose a path to the database file')
-            return
+        if not noDbMode:
+            dbFilePath = self.parent.dbFilePath.get()
+            if not dbFilePath or dbFilePath.startswith('Enter'):
+                self.logln('Please choose a path to the database file')
+                return
+            else:
+                self.parent.console.writeln('Database file located at: ' + self.parent.dbFilePath.get())
         else:
-            self.parent.console.writeln('Database file located at: ' + self.parent.dbFilePath.get())
+            self.parent.console.writeln('WormBase gene IDs specified exclusively. No database file required')
 
         # The desired output file path must be specified
         outFilePath = self.parent.outFilePath.get()
@@ -136,11 +157,11 @@ class ProcessButton (Tkinter.Button):
             self.parent.console.writeln('Writing output CSV to: ' + outFilePath)
 
         self.logln('Processing...')
-        cleanIds = self.collect_xloc_ids(listEntryText)
-
+        
         # Build the object representing the CuffLink DB
-        with open(self.parent.dbFilePath.get(), 'r') as csvDatabaseFile:
-            self.csvDatabase = WormCSV.CuffLinkDatabase(csvDatabaseFile)
+        if not noDbMode:
+            with open(self.parent.dbFilePath.get(), 'r') as csvDatabaseFile:
+                self.csvDatabase = WormCSV.CuffLinkDatabase(csvDatabaseFile)
 
         # Initialize the list of WormData objects
         allWormDatas = []
@@ -152,12 +173,22 @@ class ProcessButton (Tkinter.Button):
         for id in cleanIds:
             self.log(id + ' ... ')
 
-            wormbaseIDs = self.csvDatabase.get(id)['gene'].split(',')
+            if not noDbMode and id.startswith("XLOC"):
+                wormbaseIDs = self.csvDatabase.get(id)['gene'].split(',')
+                xlocMode = True
+            else:
+                wormbaseIDs = [id]
+                xlocMode = False
 
             for i in wormbaseIDs:
                 # Create the WormData object. The object populates its own data in its constructor
-                d = WormCSV.WormData(id, i, self.csvDatabase)
-                d.data['xloc_id'] = id
+
+                if xlocMode:
+                    d = WormCSV.WormData(id, i, self.csvDatabase)
+                    d.data['db_id'] = id
+                else:
+                    d = WormCSV.WormData(None, i, None)
+                    
                 allWormDatas.append(d)
             
             self.logln('finished')
@@ -166,7 +197,7 @@ class ProcessButton (Tkinter.Button):
 
         # This list of headers can be subject to change in the future. For now,
         # it is fixed
-        headers = ['xloc_id', 'gene_id', 'up/down', 'sequence_name', 'protein_id', 
+        headers = ['db_id', 'gene_id', 'up/down', 'sequence_name', 'protein_id', 
                    'best_human_ortholog', 'description', 'gene_class', 'human_orthologs',
                    'nematode_orthologs', 'other_orthologs']
 
