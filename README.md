@@ -66,28 +66,47 @@ USING WORMBAIT
 Using WormBait is simple and easy if you have the requisite materials. Here's what
 you'll need to get started:
 
-1. A DEG file created by the CuffLinks analysis tool (http://cole-trapnell-lab.github.io/cufflinks/)
-This file should have row after row of XLOC_IDs, followed by the corresponding WormBase gene ID. Also
-in this file should be a column for 'log2(fold_change)'.
+1. A file created by the CuffLinks analysis tool (http://cole-trapnell-lab.github.io/cufflinks/) or a similar program
+This file should have row after row of arbitrary ID numbers, followed by the corresponding WormBase gene ID. Also
+in this file should be a column for 'log2(fold_change)'. This file is used to associate values you know to
+WormBase gene IDs, and to read the log2(fold_change) value. I refer to this file as the 'database' or 'database file' throughout the program.
 
-2. A list of XLOC_IDs for which data should be collected.
-Perhaps you have identified the XLOC_IDs that are of interest to you using another tool, like the
-Venny diagram maker. Regardless of where you got them, you need to know which XLOC_IDs should have
-data collected for them
+2. A list of database IDs for which data should be collected.
+These IDs can be as simple as row numbers, or as tool-specific as XLOC_IDs. Perhaps you have identified the IDs that are of interest to you using another tool, like the Venny diagram maker. Regardless of where you got them, you need to know which IDs should have data collected for them.
+
+2b. NB: if you wish only to collect data from WormBase and you KNOW the WormBase gene IDs you are interested in, you
+can bypass using a database file and simply put your WormBase gene IDs directly into the input box. WormBait will
+recognize what you're doing and won't bother you for a database file.
 
 3. An internet connection
 Don't leave home without it!
 
-Enter your list of XLOC_IDs in the top textarea of the WormBait window. Then specify the filepath to the
-CuffLinks DEG file in the first filechooser line. Then specify the desired filepath to the output CSV
-file in the second filechooser line. Finally, press the "Process" button.
+Enter your list of database IDs in the top textarea of the WormBait window. Then specify the filepath to the
+database file in the first filechooser line. 
+
+*** Again -- if you do not have a database file and you already know the WormBase gene IDs that are of interest to you, you can enter those gene IDs into the top textarea and ignore the use of the database file.
+
+Then specify the desired filepath to the output CSV file in the second filechooser line. Finally, press the "Process" button.
 
 You'll see text appear in the bottom textarea informing you of WormBait's progress. If it ever stalls, check
 the Terminal/cmd window from which you launched WormBait. Error messages will appear here.
 
 When the bottom textarea informs you that the run is finished, open the output file you specified and inspect
-the results. Voila, you have successfully used WormBait to collect data from WormBase!
+the results. The output will include as much of the following data as is available for each ID you provide:
 
+- Database ID (if using a database file)
+- WormBase gene ID
+- Fold change value (if using a database file)
+- Sequence name
+- Protein ID
+- Best human ortholog
+- Description
+- Gene class
+- Human orthologs
+- Nematode orthologs
+- Other orthologs
+
+Voila, you have successfully used WormBait to collect data from WormBase!
 
 Christopher Anna
 
