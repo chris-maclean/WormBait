@@ -22,9 +22,13 @@ Welcome to WormBait! This program was developed for the Department of Infectious
 at the University of Georgia. It is a very narrow, but effective tool for rapidly collecting
 data from the WormBase database using their RESTful API.
 
+ABOUT WORMBAIT
+-------------------------------------------------
+WormBait is written in 100% Python. It makes uses of the WormBase public RESTful API (http://www.wormbase.org/about/userguide/for_developers/API-REST#10--10) to collect various pieces of information about gene hits such as orthologs, gene classes, gene models, and more. It then produces a CSV report with the collected information suitable for review in a spreadsheeting program like Microsoft Excel. 
+
 RUNNING WORMBAIT
 -------------------------------------------------
-WormBait is written in 100% Python. To run it, you'll need either Python2 or Python3. The
+To run WormBait, you'll need either Python2 or Python3. The
 wormBaitLauncher script is provided to make running WormBait painless to those who don't
 know or care which version of Python they have installed on their machine.
 
@@ -72,9 +76,7 @@ in this file should be a column for 'log2(fold_change)'. This file is used to as
 WormBase gene IDs, and to read the log2(fold_change) value. I refer to this file as the 'database' or 'database file' throughout the program.
 
 2. A list of database IDs for which data should be collected.
-These IDs can be as simple as row numbers, or as tool-specific as XLOC_IDs. Perhaps you have identified the IDs that are of interest to you using another tool, like the Venny diagram maker. Regardless of where you got them, you need to know which IDs should have data collected for them.
-
-2b. NB: if you wish only to collect data from WormBase and you KNOW the WormBase gene IDs you are interested in, you
+These IDs can be as simple as row numbers, or as tool-specific as XLOC_IDs. Perhaps you have identified the IDs that are of interest to you using another tool, like the Venny diagram maker. Regardless of where you got them, you need to know which IDs should have data collected for them. If you wish only to collect data from WormBase and you KNOW the WormBase gene IDs you are interested in, you
 can bypass using a database file and simply put your WormBase gene IDs directly into the input box. WormBait will
 recognize what you're doing and won't bother you for a database file.
 
