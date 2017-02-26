@@ -24,7 +24,7 @@ data from the WormBase database using their RESTful API.
 
 ABOUT WORMBAIT
 -------------------------------------------------
-WormBait is written in 100% Python. It makes uses of the WormBase public RESTful API (http://www.wormbase.org/about/userguide/for_developers/API-REST#10--10) to collect various pieces of information about gene hits such as orthologs, gene classes, gene models, and more. It then produces a CSV report with the collected information suitable for review in a spreadsheeting program like Microsoft Excel. 
+WormBait is written in 100% Python and designed to be easy to use for those who don't often run open-source software. It makes uses of the WormBase public RESTful API (http://www.wormbase.org/about/userguide/for_developers/API-REST#10--10) to collect various pieces of information about genes and proteins such as orthologs, gene classes, gene models, and more. It then produces a CSV report with the collected information suitable for review in a spreadsheeting program like Microsoft Excel. 
 
 RUNNING WORMBAIT
 -------------------------------------------------
